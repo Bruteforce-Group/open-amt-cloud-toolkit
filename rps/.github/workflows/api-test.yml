@@ -1,0 +1,36 @@
+name: RPS API Tests
+
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      with:
+        egress-policy: audit
+
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - run: docker build -f Dockerfile -t rps:${GITHUB_SHA} .
+    - run: docker-compose up -d
+    
+    - name: Let Docker Spin up
+      run: sleep 5
+    - name: Run RPS API Tests
+      run: docker run --network=host -v  /home/runner/work/rps/rps/src/test/collections/:/collections -v /home/runner/work/mps/mps/src/test/results/:/results postman/newman:5.3-alpine run /collections/rps.postman_collection.json -e /collections/rps.postman_environment.json --insecure --reporters cli,json,junit --reporter-json-export /results/rps_api_results.json --reporter-junit-export /results/rps_api_results_junit.xml
+    - name: Run RPS Security Tests
+      run: docker run --network=host -v  /home/runner/work/rps/rps/src/test/collections/:/collections -v /home/runner/work/mps/mps/src/test/results/:/results postman/newman run /collections/rps_security_api_test.postman_collection.json -e /collections/rps.postman_environment.json -d /collections/data/rps_security_api_test.data.json --insecure --reporters cli,json,junit --reporter-json-export /results/rps_api_security_results.json --reporter-junit-export /results/rps_api_security_results_junit.xml
+    # - name: Dump docker logs on failure
+    #   if: failure()
+    #   uses: jwalton/gh-docker-logs@v2
+    - name: Upload Postman Results
+      uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+      with:
+        name: rps-api
+        path: /home/runner/work/mps/mps/src/test/results

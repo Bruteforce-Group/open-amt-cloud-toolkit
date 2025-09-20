@@ -1,0 +1,34 @@
+name: Trivy Container Scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+      # The branches below must be a subset of the branches above
+      branches: [ main ]
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+      - name: Build the Docker image
+
+        run: docker build . --file Dockerfile --tag vprodemo.azurecr.io/mps:${{ github.sha }} --tag vprodemo.azurecr.io/mps:latest
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@2b6a709cf9c4025c5438138008beaddbb02086f0 # master
+        with:
+          image-ref: 'vprodemo.azurecr.io/mps:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os'
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'

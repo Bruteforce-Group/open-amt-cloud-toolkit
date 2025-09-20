@@ -1,0 +1,12 @@
+realthing
+rpc
+*.exe
+!/internal/rpc
+coverage
+**/bin
+**/obj
+**/*.so
+**/*.dll
+**/*.h
+**/launch.json
+.nextVersion

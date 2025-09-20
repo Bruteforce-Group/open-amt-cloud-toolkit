@@ -1,0 +1,35 @@
+acmactivate:
+  amtPassword: 'test'
+  provisioningCert: 'your provisioning certificate'
+  provisioningCertPwd: 'test'
+wifiConfigs:
+  - profileName: 'exampleWifiWPA2' # friendly name, alphanumeric only
+    ssid: 'exampleSSID'
+    priority: 1 # must be unique across profiles
+    authenticationMethod: 6
+    encryptionMethod: 4
+    pskPassphrase: 'example123!@#'  # SECRET: can be in this file, a secrets file, or user prompt
+  - profileName: 'exampleWifiWPA' # friendly name
+    ssid: 'exampleSSID'
+    priority: 2 # must be unique across profiles
+    authenticationMethod: 4
+    encryptionMethod: 4
+    pskPassphrase: ''  # SECRET: can be in this file, a secrets file, or user prompt
+  - profileName: 'exampleWifi8021xTLS' # friendly name, alphanumeric only
+    ssid: 'ssid'
+    priority: 3 # must be unique across profiles
+    authenticationMethod: 7
+    encryptionMethod: 4
+    ieee8021xProfileName: 'exampleIeee8021xEAP-TLS'
+ieee8021xConfigs:
+  - profileName: 'exampleIeee8021xEAP-TLS'
+    username: "exampleUserName"
+    authenticationProtocol: 0 # Extensible Authentication Protocol (ex. EAP-TLS(0))
+    clientCert: 'testClientCertString'
+    caCert: 'testCaCertString'
+    privateKey: '' # SECRET: can be in this file, a secrets file, or user prompt
+  - profileName: 'exampleIeee8021xMSCHAPv2'
+    username: "exampleUserName"
+    password: "" # SECRET: can be in this file, a secrets file, or user prompt
+    authenticationProtocol: 2 # Extensible Authentication Protocol (ex. EAP-TLS(0))
+    caCert: 'testCaCertString'

@@ -1,0 +1,57 @@
+#/*********************************************************************
+# Copyright (c) Intel Corporation 2020
+# SPDX-License-Identifier: Apache-2.0
+#**********************************************************************/
+version: '3.4'
+services:
+  rps:
+    image: rps
+    networks:
+      - openamtnetwork1
+    ports:
+      - 8081:8081
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      RPS_VAULT_ADDRESS: http://vault:8200
+      RPS_CONNECTION_STRING: postgresql://postgresadmin:admin123@db:5432/rpsdb
+      RPS_LOG_LEVEL: "silly"
+    depends_on:
+      - db
+      - vault
+      - consul
+  db:
+    image: postgres
+    networks:
+      - openamtnetwork1
+    restart: always
+    ports:
+      - 5432:5432
+    command: '-c max_connections=200'
+    environment:
+      POSTGRES_DB: rpsdb
+      POSTGRES_USER: postgresadmin
+      POSTGRES_PASSWORD: admin123
+    volumes:
+      - ./data:/docker-entrypoint-initdb.d
+  vault:
+    image: hashicorp/vault
+    networks:
+      - openamtnetwork1
+    ports:
+      - 8200:8200
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: myroot
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+    cap_add:
+      - IPC_LOCK
+  consul:
+    image: hashicorp/consul
+    networks:
+      - openamtnetwork1
+    ports: 
+      - 8500:8500
+networks:
+  openamtnetwork1:
+    driver: "bridge"
